@@ -32,6 +32,6 @@ uvicorn app.main:app --reload
 | ...    | ...      | Funciones del módulo |
 
 ## 👥 Integrantes del Equipo
-* Dev Principal:
-* Product Owner del módulo:
-* Scrum Master asignado:
+* Dev Principal: Mateo Covena
+* Product Owner del módulo: Anthony Martinez
+* Scrum Master asignado: Marlon Mendoza
