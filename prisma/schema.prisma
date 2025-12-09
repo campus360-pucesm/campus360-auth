@@ -1,0 +1,37 @@
+// Prisma Schema for CAMPUS360 Authentication Module
+// Database: Supabase (PostgreSQL)
+
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model - Stores registered users
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password_hash String
+  full_name     String
+  role          String      @default("student")
+  created_at    DateTime    @default(now())
+  access_logs   AccessLog[]
+
+  @@map("users")
+}
+
+// AccessLog Model - Tracks location access via QR scanning
+model AccessLog {
+  id            Int      @id @default(autoincrement())
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location_code String
+  timestamp     DateTime @default(now())
+
+  @@map("access_logs")
+}
