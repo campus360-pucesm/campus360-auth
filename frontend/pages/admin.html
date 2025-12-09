@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - CAMPUS360</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            background: #f3f4f6;
+            padding: 0;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .admin-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .admin-card h2 {
+            color: var(--dark);
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+
+        .qr-preview {
+            text-align: center;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .qr-preview img {
+            max-width: 300px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .btn-download {
+            background: var(--success);
+            color: white;
+            margin-top: 12px;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>🔧 Panel de Administración</h1>
+            <p>Generador de Códigos QR para Ubicaciones</p>
+        </div>
+
+        <div class="admin-card">
+            <h2>Generar QR de Ubicación</h2>
+            <p style="color: #6b7280; margin-bottom: 24px;">
+                Crea códigos QR para pegar en laboratorios, aulas y otros espacios
+            </p>
+
+            <form id="generateForm">
+                <div class="form-group">
+                    <label for="locationCode">Código de Ubicación *</label>
+                    <input type="text" id="locationCode" required placeholder="Ej: LAB-101, AULA-302, BIBLIOTECA">
+                </div>
+
+                <div class="form-group">
+                    <label for="locationName">Nombre de Ubicación (Opcional)</label>
+                    <input type="text" id="locationName" placeholder="Ej: Laboratorio de Computación 1">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Generar QR</button>
+            </form>
+
+            <div id="qrPreview" class="qr-preview hidden">
+                <h3 style="color: var(--dark); margin-bottom: 8px;">QR Generado</h3>
+                <p id="qrCodeText" style="color: #6b7280; margin-bottom: 16px;"></p>
+                <img id="qrImage" src="" alt="QR Code">
+                <br>
+                <button class="btn btn-download" onclick="downloadQR()">Descargar QR</button>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>📋 Ubicaciones Sugeridas</h2>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px;">
+                <button class="btn btn-secondary" onclick="quickGenerate('LAB-101')">LAB-101</button>
+                <button class="btn btn-secondary" onclick="quickGenerate('LAB-102')">LAB-102</button>
+                <button class="btn btn-secondary" onclick="quickGenerate('AULA-301')">AULA-301</button>
+                <button class="btn btn-secondary" onclick="quickGenerate('BIBLIOTECA')">BIBLIOTECA</button>
+                <button class="btn btn-secondary" onclick="quickGenerate('CAFETERIA')">CAFETERIA</button>
+                <button class="btn btn-secondary" onclick="quickGenerate('GIMNASIO')">GIMNASIO</button>
+            </div>
+        </div>
+
+        <div class="text-center" style="margin-top: 24px;">
+            <a href="../index.html">← Volver al Login</a>
+        </div>
+    </div>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        let currentQRBlob = null;
+        let currentLocationCode = '';
+
+        document.getElementById('generateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn, true);
+
+            const locationCode = document.getElementById('locationCode').value;
+            const locationName = document.getElementById('locationName').value;
+
+            try {
+                await generateQR(locationCode, locationName);
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
+        });
+
+        async function generateQR(locationCode, locationName = '') {
+            const response = await apiRequest('/admin/qr/generate-location', {
+                method: 'POST',
+                body: JSON.stringify({
+                    location_code: locationCode,
+                    location_name: locationName
+                }),
+                skipAuth: true
+            });
+
+            currentQRBlob = await response.blob();
+            currentLocationCode = locationCode;
+
+            const imageUrl = URL.createObjectURL(currentQRBlob);
+
+            document.getElementById('qrImage').src = imageUrl;
+            document.getElementById('qrCodeText').textContent = `Código: ${locationCode}${locationName ? ' - ' + locationName : ''}`;
+            document.getElementById('qrPreview').classList.remove('hidden');
+
+            showAlert('✅ QR generado exitosamente', 'success');
+        }
+
+        function quickGenerate(code) {
+            document.getElementById('locationCode').value = code;
+            document.getElementById('locationName').value = '';
+            document.getElementById('generateForm').dispatchEvent(new Event('submit'));
+        }
+
+        function downloadQR() {
+            if (!currentQRBlob) return;
+
+            const url = URL.createObjectURL(currentQRBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentLocationCode}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showAlert('QR descargado exitosamente', 'success');
+        }
+    </script>
+</body>
+
+</html>
