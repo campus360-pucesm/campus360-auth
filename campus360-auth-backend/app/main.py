@@ -3,6 +3,7 @@ CAMPUS360 Authentication Module
 Main FastAPI application with Prisma ORM integration
 """
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,9 +38,16 @@ app = FastAPI(
 )
 
 # Configure CORS
+# Get allowed origins from environment variable or use wildcard for development
+allowed_origins = os.getenv("FRONTEND_URL", "*")
+if allowed_origins != "*":
+    allowed_origins = [url.strip() for url in allowed_origins.split(",")]
+else:
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especifica los dominios permitidos
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
