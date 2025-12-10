@@ -1,92 +1,156 @@
-# CAMPUS360 Authentication Module
+# CAMPUS360 Auth - Monorepo
 
-## 🚀 Quick Start Guide
+Sistema de autenticación completo para CAMPUS360 con backend FastAPI y frontend React.
 
-### 1. Install Dependencies
+## 📁 Estructura del Proyecto
+
+```
+campus360-auth/
+├── campus360-auth-backend/     # Backend FastAPI + Prisma
+│   ├── app/                    # Código de la aplicación
+│   ├── prisma/                 # Esquemas de base de datos
+│   ├── .venv/                  # Entorno virtual Python
+│   ├── .env                    # Variables de entorno
+│   └── requirements.txt        # Dependencias Python
+│
+├── campus360-auth-frontend/    # Frontend React + Vite
+│   ├── src/                    # Código fuente
+│   ├── public/                 # Archivos estáticos
+│   ├── package.json            # Dependencias Node
+│   └── vite.config.js          # Configuración Vite
+│
+└── README.md                   # Este archivo
+```
+
+## 🚀 Inicio Rápido
+
+### Backend (Puerto 8000)
+
 ```bash
+cd campus360-auth-backend
+
+# Activar entorno virtual
+source .venv/bin/activate  # Linux/Mac
+# o
+.venv\Scripts\activate     # Windows
+
+# Instalar dependencias (si es necesario)
 pip install -r requirements.txt
-```
 
-### 2. Configure Environment
-Copy `.env.example` to `.env` and update with your Supabase credentials:
-```bash
-cp .env.example .env
-```
+# Generar cliente Prisma
+export PATH="$HOME/.local/bin:$PATH"
+python -m prisma py generate
 
-Edit `.env`:
-```env
-DATABASE_URL="your-supabase-postgresql-url"
-SECRET_KEY="your-secret-key"
-```
-
-### 3. Generate Prisma Client & Create Tables
-```bash
-python -m prisma generate
+# Aplicar migraciones
 python -m prisma db push
-```
 
-### 4. Run the Server
-```bash
+# Iniciar servidor
 uvicorn app.main:app --reload
 ```
 
-Visit: http://localhost:8000/docs
+El backend estará disponible en: **http://localhost:8000**
+- Documentación API: http://localhost:8000/docs
+- Documentación alternativa: http://localhost:8000/redoc
 
----
+### Frontend (Puerto 5173)
 
-## 📋 API Endpoints
+```bash
+cd campus360-auth-frontend
 
-### Authentication
-- **POST /auth/register** - Register new user
-- **POST /auth/login** - Login and get JWT token
+# Instalar dependencias (primera vez)
+npm install
 
-### QR Access (Protected 🔒)
-- **GET /qr/me** - Get user profile for QR generation
-- **POST /qr/scan** - Record location access
-- **GET /qr/history** - Get access history
-
----
-
-## 🏗️ Tech Stack
-- **FastAPI** - Modern Python web framework
-- **Prisma** - Type-safe ORM
-- **Supabase** - PostgreSQL database
-- **JWT** - Secure authentication
-- **Bcrypt** - Password hashing
-
----
-
-## 📁 Project Structure
-```
-campus360-auth/
-├── prisma/
-│   └── schema.prisma          # Database models
-├── app/
-│   ├── config.py              # Environment configuration
-│   ├── main.py                # FastAPI app with Prisma lifecycle
-│   ├── routers/
-│   │   ├── auth.py            # Registration & login
-│   │   └── qr_access.py       # QR scanning endpoints
-│   ├── schemas/
-│   │   └── schemas.py         # Pydantic models
-│   └── utils/
-│       └── auth_utils.py      # JWT & password utilities
-├── requirements.txt           # Python dependencies
-└── .env                       # Environment variables (not in git)
+# Iniciar servidor de desarrollo
+npm run dev
 ```
 
----
+El frontend estará disponible en: **http://localhost:5173**
 
-## 🔐 Security Features
-- ✅ Bcrypt password hashing
-- ✅ JWT token authentication
-- ✅ OAuth2 password flow
-- ✅ Email uniqueness validation
-- ✅ Protected endpoints with dependency injection
+## 🔧 Configuración
 
----
+### Backend (.env)
 
-## 📚 Documentation
-Full API documentation available at `/docs` when server is running.
+Crea o edita `campus360-auth-backend/.env`:
 
-For detailed implementation walkthrough, see [walkthrough.md](file:///home/srchaoz/.gemini/antigravity/brain/ce3e24ba-602f-4292-b129-8734280dc451/walkthrough.md)
+```env
+DATABASE_URL="postgresql://usuario:password@host:puerto/database"
+SECRET_KEY="tu-clave-secreta-super-segura"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+### Frontend
+
+La configuración de la API está en `campus360-auth-frontend/src/api/api.js`:
+- Por defecto apunta a `http://localhost:8000`
+- Cambiar `API_URL` si el backend está en otro puerto
+
+## 📝 Comandos Útiles
+
+### Backend
+
+```bash
+# Regenerar cliente Prisma (después de cambiar schema)
+python -m prisma py generate
+
+# Ver logs de Prisma
+python -m prisma studio
+
+# Ejecutar tests
+pytest
+```
+
+### Frontend
+
+```bash
+# Compilar para producción
+npm run build
+
+# Preview de producción
+npm run preview
+
+# Linter
+npm run lint
+```
+
+## 🔐 Características
+
+- ✅ Autenticación JWT
+- ✅ Registro y login de usuarios
+- ✅ Credencial digital con QR
+- ✅ Escáner de QR con cámara
+- ✅ Registro de accesos a ubicaciones
+- ✅ Historial de accesos
+- ✅ Panel de administración
+
+## 🛠️ Tecnologías
+
+**Backend:**
+- FastAPI
+- Prisma ORM
+- PostgreSQL (Supabase)
+- JWT Authentication
+- QR Code Generation
+
+**Frontend:**
+- React
+- Vite
+- React Router
+- HTML5 QR Code Scanner
+- Tailwind CSS (si aplica)
+
+## 📦 Despliegue
+
+### Backend
+- Configurar `DATABASE_URL` con la base de datos de producción
+- Cambiar `SECRET_KEY` a una clave segura
+- Desactivar `--reload` en producción
+
+### Frontend
+- Actualizar `API_URL` en `src/api/api.js` con la URL del backend en producción
+- Ejecutar `npm run build`
+- Servir la carpeta `dist/` con un servidor web
+
+## 👥 Equipo
+
+CAMPUS360 - PUCESM

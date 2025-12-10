@@ -9,12 +9,20 @@ from pydantic import BaseModel, EmailStr, Field
 
 # ==================== User Schemas ====================
 
-class UserRegister(BaseModel):
-    """Schema for user registration"""
+class UserCreate(BaseModel):
+    """Schema for creating a new user (admin only)"""
     email: EmailStr
     password: str = Field(..., min_length=6, description="Password must be at least 6 characters")
     full_name: str = Field(..., min_length=2, description="Full name of the user")
-    role: str = Field(default="student", description="User role (student, teacher, admin)")
+    role: str = Field(..., description="User role (admin, teacher, or student)")
+
+
+class UserUpdate(BaseModel):
+    """Schema for updating user information (admin only)"""
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=6, description="New password (optional)")
+    full_name: Optional[str] = Field(None, min_length=2, description="New full name (optional)")
+    role: Optional[str] = Field(None, description="New role (optional)")
 
 
 class UserLogin(BaseModel):

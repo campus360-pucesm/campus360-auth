@@ -60,6 +60,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     
     Args:
         data: Dictionary containing claims to encode in the token
+              Should include 'sub' (user_id) and 'role'
         expires_delta: Optional custom expiration time
         
     Returns:

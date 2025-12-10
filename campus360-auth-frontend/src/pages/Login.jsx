@@ -77,14 +77,11 @@ export default function Login() {
                     />
 
                     <Button type="submit">Ingresar</Button>
-
-                    <Button
-                        variant="secondary"
-                        onClick={() => (window.location.href = "/register")}
-                    >
-                        Crear Cuenta
-                    </Button>
                 </form>
+
+                <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>
+                    <p>¿No tienes cuenta? Contacta al administrador</p>
+                </div>
             </div>
         </div>
     );
