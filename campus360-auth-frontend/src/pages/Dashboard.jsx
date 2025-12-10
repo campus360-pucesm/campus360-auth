@@ -17,6 +17,12 @@ export default function Dashboard() {
     const [history, setHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [generatingQR, setGeneratingQR] = useState(false);
+    
+    // For teacher location QR generation
+    const [locationCode, setLocationCode] = useState("");
+    const [locationName, setLocationName] = useState("");
+    const [locationQrUrl, setLocationQrUrl] = useState(null);
+    const [loadingLocationQR, setLoadingLocationQR] = useState(false);
 
     useEffect(() => {
         // si no hay usuario → fuera
@@ -87,14 +93,83 @@ export default function Dashboard() {
         }
     };
 
+    const generateLocationQR = async (e) => {
+        e.preventDefault();
+        if (!locationCode) {
+            showAlert("error", "El código de ubicación es obligatorio");
+            return;
+        }
+
+        try {
+            setLoadingLocationQR(true);
+            const res = await api("/admin/qr/generate-location", {
+                method: "POST",
+                body: JSON.stringify({
+                    location_code: locationCode,
+                    location_name: locationName,
+                }),
+            });
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            setLocationQrUrl(url);
+            showAlert("success", "QR de ubicación generado correctamente");
+        } catch (err) {
+            showAlert("error", "Error al generar QR: " + err.message);
+        } finally {
+            setLoadingLocationQR(false);
+        }
+    };
+
+    const downloadLocationQR = () => {
+        if (!locationQrUrl || !locationCode) return;
+        const a = document.createElement("a");
+        a.href = locationQrUrl;
+        a.download = `${locationCode}.png`;
+        a.click();
+    };
+
+    const getRoleLabel = (role) => {
+        switch (role) {
+            case "admin": return "Administrador";
+            case "teacher": return "Profesor";
+            case "student": return "Estudiante";
+            default: return role;
+        }
+    };
+
+    const getRoleBadgeColor = (role) => {
+        switch (role) {
+            case "admin": return "#dc2626";
+            case "teacher": return "#2563eb";
+            case "student": return "#16a34a";
+            default: return "#6b7280";
+        }
+    };
+
     if (!localUser) return null;
+
+    const isTeacherOrAdmin = localUser.role === "admin" || localUser.role === "teacher";
+    const isStudent = localUser.role === "student";
 
     return (
         <div className="dashboard-container">
             <div className="dashboard-header">
                 <div>
                     <h2>{localUser.full_name}</h2>
-                    <p style={{ color: "#6b7280", fontSize: "14px" }}>{localUser.email}</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
+                        <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>{localUser.email}</p>
+                        <span style={{
+                            background: getRoleBadgeColor(localUser.role),
+                            color: "white",
+                            padding: "2px 8px",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            fontWeight: "500"
+                        }}>
+                            {getRoleLabel(localUser.role)}
+                        </span>
+                    </div>
                 </div>
                 <div style={{ display: "flex", gap: "10px" }}>
                     {localUser.role === "admin" && (
@@ -123,12 +198,25 @@ export default function Dashboard() {
                 >
                     🎓 Credencial
                 </button>
-                <button
-                    className={`tab-button ${activeTab === "scan" ? "active" : ""}`}
-                    onClick={() => setActiveTab("scan")}
-                >
-                    📷 Escanear
-                </button>
+                
+                {isStudent && (
+                    <button
+                        className={`tab-button ${activeTab === "scan" ? "active" : ""}`}
+                        onClick={() => setActiveTab("scan")}
+                    >
+                        📷 Escanear
+                    </button>
+                )}
+                
+                {isTeacherOrAdmin && (
+                    <button
+                        className={`tab-button ${activeTab === "generate-qr" ? "active" : ""}`}
+                        onClick={() => setActiveTab("generate-qr")}
+                    >
+                        📍 Generar QR
+                    </button>
+                )}
+                
                 <button
                     className={`tab-button ${
                         activeTab === "history" ? "active" : ""
@@ -161,8 +249,61 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {activeTab === "scan" && (
+                {activeTab === "scan" && isStudent && (
                     <QRScanner onScan={handleScanLocation} />
+                )}
+
+                {activeTab === "generate-qr" && isTeacherOrAdmin && (
+                    <div className="admin-card">
+                        <h3 style={{ marginBottom: "6px" }}>Generar QR de Ubicación</h3>
+                        <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "16px" }}>
+                            Crea códigos QR para aulas, laboratorios y otros puntos del campus.
+                        </p>
+
+                        <form onSubmit={generateLocationQR}>
+                            <div className="form-group">
+                                <label>Código de ubicación *</label>
+                                <input
+                                    type="text"
+                                    value={locationCode}
+                                    onChange={(e) => setLocationCode(e.target.value)}
+                                    placeholder="Ej: LAB-101, AULA-302"
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Nombre de ubicación (opcional)</label>
+                                <input
+                                    type="text"
+                                    value={locationName}
+                                    onChange={(e) => setLocationName(e.target.value)}
+                                    placeholder="Laboratorio de Computación 1"
+                                />
+                            </div>
+
+                            <Button type="submit">
+                                {loadingLocationQR ? "Generando..." : "Generar QR"}
+                            </Button>
+                        </form>
+
+                        {locationQrUrl && (
+                            <div style={{ marginTop: "20px", textAlign: "center" }}>
+                                <p style={{ marginBottom: "10px" }}>
+                                    Código: <strong>{locationCode}</strong>
+                                    {locationName ? ` - ${locationName}` : ""}
+                                </p>
+                                <img
+                                    src={locationQrUrl}
+                                    alt="QR ubicación"
+                                    style={{ maxWidth: "260px", border: "2px solid #e5e7eb", borderRadius: "8px" }}
+                                />
+                                <div style={{ marginTop: "12px" }}>
+                                    <Button onClick={downloadLocationQR}>Descargar QR</Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {activeTab === "history" && (

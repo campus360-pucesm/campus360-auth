@@ -5,9 +5,12 @@ Handles administrative tasks like generating location QR codes
 from io import BytesIO
 
 import qrcode
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+
+from app.utils.auth_utils import get_current_user
+from app.utils.authorization import require_admin_or_teacher
 
 router = APIRouter(
     prefix="/admin",
@@ -22,9 +25,14 @@ class LocationQRRequest(BaseModel):
 
 
 @router.post("/qr/generate-location")
-async def generate_location_qr(request: LocationQRRequest):
+async def generate_location_qr(
+    request: LocationQRRequest,
+    current_user = Depends(get_current_user)
+):
     """
     Generate a QR code image for a physical location
+    
+    **Accessible by admin and teacher roles**
     
     This endpoint generates a QR code that can be printed and placed
     at physical locations (labs, classrooms, etc.). When students scan
@@ -35,6 +43,9 @@ async def generate_location_qr(request: LocationQRRequest):
     
     Returns a PNG image of the QR code
     """
+    # Check if user is admin or teacher
+    require_admin_or_teacher(current_user)
+    
     try:
         # Create QR code instance
         qr = qrcode.QRCode(

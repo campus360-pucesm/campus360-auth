@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import admin, auth, health, qr_access
+from app.routers import admin, admin_users, auth, health, qr_access
 from app.utils.auth_utils import prisma
 
 
@@ -50,6 +50,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(qr_access.router)
 app.include_router(admin.router)
+app.include_router(admin_users.router)  # Admin user management
 
 
 @app.get("/", tags=["Root"])
