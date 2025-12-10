@@ -1,156 +1,318 @@
-# CAMPUS360 Auth - Monorepo
+# 🎓 CAMPUS360 - Authentication Module
 
-Sistema de autenticación completo para CAMPUS360 con backend FastAPI y frontend React.
+Sistema de autenticación inteligente con control de acceso basado en códigos QR para instituciones educativas.
 
-## 📁 Estructura del Proyecto
+---
 
-```
-campus360-auth/
-├── campus360-auth-backend/     # Backend FastAPI + Prisma
-│   ├── app/                    # Código de la aplicación
-│   ├── prisma/                 # Esquemas de base de datos
-│   ├── .venv/                  # Entorno virtual Python
-│   ├── .env                    # Variables de entorno
-│   └── requirements.txt        # Dependencias Python
-│
-├── campus360-auth-frontend/    # Frontend React + Vite
-│   ├── src/                    # Código fuente
-│   ├── public/                 # Archivos estáticos
-│   ├── package.json            # Dependencias Node
-│   └── vite.config.js          # Configuración Vite
-│
-└── README.md                   # Este archivo
-```
+## 📋 Descripción
+
+El módulo de autenticación CAMPUS360 proporciona una API RESTful completa para:
+
+- 🔐 **Autenticación JWT** - Sistema seguro de login con tokens
+- 📱 **Control de Acceso QR** - Gestión de acceso mediante códigos QR
+- 👥 **Gestión de Usuarios** - CRUD completo de usuarios (admin, teacher, student)
+- 📊 **Dashboard Administrativo** - Estadísticas y monitoreo de accesos
+
+Este módulo está diseñado para ser consumido como API por otros módulos del ecosistema CAMPUS360.
+
+---
 
 ## 🚀 Inicio Rápido
 
-### Backend (Puerto 8000)
+### Desarrollo Local
 
+#### Backend
 ```bash
 cd campus360-auth-backend
-
-# Activar entorno virtual
-source .venv/bin/activate  # Linux/Mac
-# o
-.venv\Scripts\activate     # Windows
-
-# Instalar dependencias (si es necesario)
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-
-# Generar cliente Prisma
-export PATH="$HOME/.local/bin:$PATH"
-python -m prisma py generate
-
-# Aplicar migraciones
+cp .env.example .env
+# Edita .env con tus credenciales de Supabase
+python -m prisma generate
 python -m prisma db push
-
-# Iniciar servidor
 uvicorn app.main:app --reload
 ```
 
-El backend estará disponible en: **http://localhost:8000**
-- Documentación API: http://localhost:8000/docs
-- Documentación alternativa: http://localhost:8000/redoc
+Visita: http://localhost:8000/docs
 
-### Frontend (Puerto 5173)
-
+#### Frontend
 ```bash
 cd campus360-auth-frontend
-
-# Instalar dependencias (primera vez)
 npm install
-
-# Iniciar servidor de desarrollo
+cp .env.example .env
+# Edita .env si es necesario
 npm run dev
 ```
 
-El frontend estará disponible en: **http://localhost:5173**
+Visita: http://localhost:5173
 
-## 🔧 Configuración
+---
 
-### Backend (.env)
+## 📚 Documentación
 
-Crea o edita `campus360-auth-backend/.env`:
+### 📖 API Documentation
+**[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** - Documentación completa de la API
 
-```env
-DATABASE_URL="postgresql://usuario:password@host:puerto/database"
-SECRET_KEY="tu-clave-secreta-super-segura"
-ALGORITHM="HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+Incluye:
+- 13 endpoints documentados
+- Ejemplos en JavaScript y Python
+- Esquemas de request/response
+- Códigos de error
+- Guías de integración
+
+### 🚀 Deployment Guide
+**[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guía de despliegue paso a paso
+
+Cubre:
+- Despliegue en Render (Backend)
+- Despliegue en Vercel (Frontend)
+- Configuración de variables de entorno
+- Solución de problemas
+- Verificación post-despliegue
+
+### 📝 Backend README
+**[campus360-auth-backend/README.md](./campus360-auth-backend/README.md)** - Documentación del backend
+
+### 🎨 Frontend README
+**[campus360-auth-frontend/README.md](./campus360-auth-frontend/README.md)** - Documentación del frontend
+
+---
+
+## 🏗️ Arquitectura
+
+```
+campus360-auth/
+├── campus360-auth-backend/     # FastAPI + Prisma + Supabase
+│   ├── app/
+│   │   ├── routers/           # Endpoints de la API
+│   │   ├── schemas/           # Modelos Pydantic
+│   │   ├── utils/             # Utilidades (JWT, auth)
+│   │   └── main.py            # Aplicación FastAPI
+│   ├── prisma/
+│   │   └── schema.prisma      # Esquema de base de datos
+│   ├── render.yaml            # Configuración Render
+│   ├── build.sh               # Script de build
+│   └── requirements.txt       # Dependencias Python
+│
+├── campus360-auth-frontend/    # React + Vite
+│   ├── src/
+│   │   ├── pages/             # Páginas de la app
+│   │   ├── components/        # Componentes React
+│   │   ├── config/            # Configuración API
+│   │   └── context/           # Context API
+│   ├── vercel.json            # Configuración Vercel
+│   └── package.json           # Dependencias Node
+│
+├── API_DOCUMENTATION.md        # 📖 Documentación API
+└── DEPLOYMENT.md               # 🚀 Guía de despliegue
 ```
 
-### Frontend
+---
 
-La configuración de la API está en `campus360-auth-frontend/src/api/api.js`:
-- Por defecto apunta a `http://localhost:8000`
-- Cambiar `API_URL` si el backend está en otro puerto
+## 🔌 Endpoints Principales
 
-## 📝 Comandos Útiles
+### Autenticación
+- `POST /auth/login` - Login y obtener JWT token
+
+### QR Access
+- `GET /qr/me` - Obtener perfil de usuario
+- `POST /qr/scan` - Registrar acceso a ubicación
+- `GET /qr/history` - Historial de accesos
+
+### Admin - Gestión de Usuarios
+- `POST /admin/users` - Crear usuario
+- `GET /admin/users` - Listar usuarios
+- `GET /admin/users/{id}` - Obtener usuario
+- `PUT /admin/users/{id}` - Actualizar usuario
+- `DELETE /admin/users/{id}` - Eliminar usuario
+
+### Admin - Dashboard
+- `GET /admin/stats` - Estadísticas del sistema
+- `GET /admin/recent-access` - Accesos recientes
+
+Ver documentación completa en [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+
+---
+
+## 🛠️ Stack Tecnológico
 
 ### Backend
+- **FastAPI** - Framework web moderno de Python
+- **Prisma** - ORM type-safe
+- **Supabase** - Base de datos PostgreSQL
+- **JWT** - Autenticación segura
+- **Bcrypt** - Hash de contraseñas
 
+### Frontend
+- **React** - Biblioteca UI
+- **Vite** - Build tool
+- **React Router** - Enrutamiento
+- **Context API** - Gestión de estado
+
+### Deployment
+- **Render** - Backend API (Plan gratuito)
+- **Vercel** - Frontend (Plan gratuito)
+
+---
+
+## 🔐 Seguridad
+
+- ✅ Hash de contraseñas con Bcrypt
+- ✅ Autenticación JWT
+- ✅ OAuth2 password flow
+- ✅ Validación de email único
+- ✅ Endpoints protegidos con dependency injection
+- ✅ CORS configurable por entorno
+- ✅ Security headers en producción
+
+---
+
+## 🌐 Despliegue en Producción
+
+### Backend (Render)
+
+1. Conecta tu repositorio Git a Render
+2. Configura las variables de entorno:
+   - `DATABASE_URL` - URL de Supabase
+   - `SECRET_KEY` - Clave secreta JWT
+   - `FRONTEND_URL` - URL del frontend
+3. Render ejecutará automáticamente `build.sh`
+4. Tu API estará disponible en `https://tu-app.onrender.com`
+
+### Frontend (Vercel)
+
+1. Importa tu proyecto en Vercel
+2. Configura la variable de entorno:
+   - `VITE_API_URL` - URL de tu API en Render
+3. Vercel construirá y desplegará automáticamente
+4. Tu frontend estará disponible en `https://tu-app.vercel.app`
+
+**Ver guía completa:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+---
+
+## 📊 Modelos de Datos
+
+### User
+```typescript
+{
+  id: string;              // UUID
+  email: string;           // Email único
+  full_name: string;       // Nombre completo
+  role: string;            // "admin" | "teacher" | "student"
+  created_at: string;      // Timestamp
+}
+```
+
+### AccessLog
+```typescript
+{
+  id: number;              // ID autoincremental
+  user_id: string;         // UUID del usuario
+  location_code: string;   // Código de ubicación
+  timestamp: string;       // Timestamp
+}
+```
+
+---
+
+## 🔄 Integración con Otros Módulos
+
+Este módulo está diseñado para ser consumido como API. Ejemplo de integración:
+
+```javascript
+// 1. Login
+const response = await fetch('https://tu-api.onrender.com/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({
+    username: 'usuario@example.com',
+    password: 'password123'
+  })
+});
+
+const { access_token } = await response.json();
+
+// 2. Usar token en peticiones
+const profile = await fetch('https://tu-api.onrender.com/qr/me', {
+  headers: { 'Authorization': `Bearer ${access_token}` }
+});
+```
+
+Ver más ejemplos en [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+
+---
+
+## 🧪 Testing
+
+### Backend
 ```bash
-# Regenerar cliente Prisma (después de cambiar schema)
-python -m prisma py generate
-
-# Ver logs de Prisma
-python -m prisma studio
-
-# Ejecutar tests
+cd campus360-auth-backend
 pytest
 ```
 
 ### Frontend
-
 ```bash
-# Compilar para producción
-npm run build
-
-# Preview de producción
-npm run preview
-
-# Linter
-npm run lint
+cd campus360-auth-frontend
+npm test
 ```
 
-## 🔐 Características
+---
 
-- ✅ Autenticación JWT
-- ✅ Registro y login de usuarios
-- ✅ Credencial digital con QR
-- ✅ Escáner de QR con cámara
-- ✅ Registro de accesos a ubicaciones
-- ✅ Historial de accesos
-- ✅ Panel de administración
+## 📝 Variables de Entorno
 
-## 🛠️ Tecnologías
+### Backend (.env)
+```env
+DATABASE_URL="postgresql://..."
+SECRET_KEY="your-secret-key"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+FRONTEND_URL="https://your-frontend.vercel.app"
+```
 
-**Backend:**
-- FastAPI
-- Prisma ORM
-- PostgreSQL (Supabase)
-- JWT Authentication
-- QR Code Generation
+### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:8000
+```
 
-**Frontend:**
-- React
-- Vite
-- React Router
-- HTML5 QR Code Scanner
-- Tailwind CSS (si aplica)
+---
 
-## 📦 Despliegue
+## 🤝 Contribuir
 
-### Backend
-- Configurar `DATABASE_URL` con la base de datos de producción
-- Cambiar `SECRET_KEY` a una clave segura
-- Desactivar `--reload` en producción
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-### Frontend
-- Actualizar `API_URL` en `src/api/api.js` con la URL del backend en producción
-- Ejecutar `npm run build`
-- Servir la carpeta `dist/` con un servidor web
+---
 
-## 👥 Equipo
+## 📄 Licencia
 
-CAMPUS360 - PUCESM
+Este proyecto es parte del ecosistema CAMPUS360.
+
+---
+
+## 📞 Soporte
+
+- **Documentación API:** [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+- **Guía de Despliegue:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **Swagger UI:** `https://tu-api.onrender.com/docs`
+- **ReDoc:** `https://tu-api.onrender.com/redoc`
+
+---
+
+## 🎯 Roadmap
+
+- [ ] Implementar refresh tokens
+- [ ] Agregar rate limiting
+- [ ] Implementar 2FA
+- [ ] Agregar logs de auditoría
+- [ ] Implementar notificaciones por email
+- [ ] Agregar exportación de reportes
+- [ ] Implementar búsqueda avanzada de usuarios
+
+---
+
+**Desarrollado para CAMPUS360** 🎓
