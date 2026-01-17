@@ -244,14 +244,6 @@ Ver más ejemplos en [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
 
 ---
 
-## 🧪 Testing
-
-### Backend
-```bash
-cd campus360-auth-backend
-pytest
-```
-
 ### Frontend
 ```bash
 cd campus360-auth-frontend
@@ -260,7 +252,7 @@ npm test
 
 ---
 
-## 📝 Variables de Entorno
+## Variables de Entorno
 
 ### Backend (.env)
 ```env
@@ -276,43 +268,8 @@ FRONTEND_URL="https://your-frontend.vercel.app"
 VITE_API_URL=http://localhost:8000
 ```
 
----
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-## 📄 Licencia
-
-Este proyecto es parte del ecosistema CAMPUS360.
-
----
-
-## 📞 Soporte
 
 - **Documentación API:** [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
-- **Guía de Despliegue:** [DEPLOYMENT.md](./DEPLOYMENT.md)
-- **Swagger UI:** `https://tu-api.onrender.com/docs`
-- **ReDoc:** `https://tu-api.onrender.com/redoc`
 
 ---
 
-## 🎯 Roadmap
-
-- [ ] Implementar refresh tokens
-- [ ] Agregar rate limiting
-- [ ] Implementar 2FA
-- [ ] Agregar logs de auditoría
-- [ ] Implementar notificaciones por email
-- [ ] Agregar exportación de reportes
-- [ ] Implementar búsqueda avanzada de usuarios
-
----
-
-**Desarrollado para CAMPUS360** 🎓
