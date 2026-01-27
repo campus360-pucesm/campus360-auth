@@ -1,21 +1,21 @@
-# FastAPI Core
-fastapi
-uvicorn[standard]
+# FastAPI Core (compatible with Pydantic 2.x)
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
 
 # Pydantic & Settings
-pydantic[email]
-pydantic-settings
+pydantic[email]>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0
 
 # Database & ORM
-prisma
+prisma>=0.11.0
 
 # Authentication
-python-jose[cryptography]
-passlib[bcrypt]
-python-multipart
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
 
 # Environment
-python-dotenv
+python-dotenv>=1.0.0
 
 # QR Code Generation
-qrcode[pil]
+qrcode[pil]>=7.4.2
